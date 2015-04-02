@@ -23,6 +23,8 @@ class BDFH5(object):
 
         self.append_count = 0
 
+        self.data_tables = {}
+
         self._setup_hierarchy(h5file)
 
     def _setup_hierarchy(self, h5file):
@@ -77,6 +79,8 @@ class BDFH5(object):
             table = self.file.get_node(parent_group, table_name)
         except tables.exceptions.NoSuchNodeError:
             table = self.file.create_table(parent_group, table_name, data_config, table_description)
+
+        self.data_tables[table_name] = table
 
         return table
 
