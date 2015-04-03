@@ -8,13 +8,12 @@ class BDFTable(tables.IsDescription):
     CARD = tables.StringCol(8)
 
 
-class BDFH5(object):
+class BDFH5Writer(object):
     def __init__(self, h5file, prefix):
-        super(BDFH5, self).__init__()
+        super(BDFH5Writer, self).__init__()
 
-        self.file = h5file
-        self.prefix = prefix
-        self.file = None
+        self._file = None
+        self._prefix = None
 
         self.nastran = None
         self.executive_control = None
@@ -23,21 +22,46 @@ class BDFH5(object):
 
         self.append_count = 0
 
-        self.data_tables = {}
+        self.prefix = prefix
+        self.file = h5file
 
-        self._setup_hierarchy(h5file)
+        self._setup_hierarchy()
 
-    def _setup_hierarchy(self, h5file):
+    @property
+    def file(self):
+        return self._file
 
-        if self.file is None:
-            self.file = h5file
+    @file.setter
+    def file(self, value):
+        if isinstance(value, str):
+            try:
+                self._file = tables.open_file(value, mode="w", title="%s" % value)
+                self._file.create_group("/", self._prefix, "%s Data" % self._prefix)
+            except Exception:
+                print "Unable to create h5 file %s!" % value
+                return
+        else:
+            self._file = value
+
+    @property
+    def prefix(self):
+        return self._prefix
+
+    @prefix.setter
+    def prefix(self, value):
+        if value[:1] == "/":
+            self._prefix = value[1:]
+        else:
+            self._prefix = value
+
+    def _setup_hierarchy(self):
 
         NoSuchNodeError = tables.exceptions.NoSuchNodeError
 
         try:
-            self.nastran = self.file.get_node(self.prefix, "Nastran")
+            self.nastran = self.file.get_node("/" + self.prefix, "Nastran")
         except NoSuchNodeError:
-            self.nastran = self.file.create_group(self.prefix, "Nastran", "Nastran Data")
+            self.nastran = self.file.create_group("/" + self.prefix, "Nastran", "Nastran Data")
 
         try:
             self.executive_control = self.file.get_node(self.nastran, "ExecutiveControl")
@@ -54,11 +78,37 @@ class BDFH5(object):
         except NoSuchNodeError:
             self.bulk_data = self.file.create_group(self.nastran, "BulkData", "Bulk Data")
 
-        self.card_tables = {"COORD": self.create_table(self.bulk_data, "CoordsTable", BDFTable, "Coords Table"),
-                            "GRID": self.create_table(self.bulk_data, "GridsTable", BDFTable, "Grids Table"),
-                            "ELEMENT": self.create_table(self.bulk_data, "ElementsTables", BDFTable, "Elements Table"),
-                            "PROPERTY": self.create_table(self.bulk_data, "PropertiesTable", BDFTable, "Properties Table"),
-                            "MATERIAL": self.create_table(self.bulk_data, "MaterialsTable", BDFTable, "Materials Table")}
+        self.card_tables = {}
+
+        try:
+            table = self.file.get_node(self.bulk_data, "CoordTable")
+            self.card_tables['COORD'] = table
+        except NoSuchNodeError:
+            self.card_tables['COORD'] = self.create_table(self.bulk_data, "CoordTable", BDFTable, "Coord Table")
+
+        try:
+            table = self.file.get_node(self.bulk_data, "GridTable")
+            self.card_tables['GRID'] = table
+        except NoSuchNodeError:
+            self.card_tables['GRID'] = self.create_table(self.bulk_data, "GridTable", BDFTable, "Grid Table")
+
+        try:
+            table = self.file.get_node(self.bulk_data, "ElementTable")
+            self.card_tables['ELEMENT'] = table
+        except NoSuchNodeError:
+            self.card_tables['ELEMENT'] = self.create_table(self.bulk_data, "ElementTable", BDFTable, "Element Table")
+
+        try:
+            table = self.file.get_node(self.bulk_data, "PropertyTable")
+            self.card_tables['PROPERTY'] = table
+        except NoSuchNodeError:
+            self.card_tables['PROPERTY'] = self.create_table(self.bulk_data, "PropertyTable", BDFTable, "Property Table")
+
+        try:
+            table = self.file.get_node(self.bulk_data, "MaterialTable")
+            self.card_tables['MATERIAL'] = table
+        except NoSuchNodeError:
+            self.card_tables['MATERIAL'] = self.create_table(self.bulk_data, "MaterialTable", BDFTable, "Material Table")
 
         self.card_data = {"COORD": self.card_tables["COORD"].row,
                           "GRID": self.card_tables["GRID"].row,
@@ -79,8 +129,6 @@ class BDFH5(object):
             table = self.file.get_node(parent_group, table_name)
         except tables.exceptions.NoSuchNodeError:
             table = self.file.create_table(parent_group, table_name, data_config, table_description)
-
-        self.data_tables[table_name] = table
 
         return table
 

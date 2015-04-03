@@ -1,13 +1,10 @@
 __author__ = 'Michael Redmond'
 
-
-import tables
 import logging
-from collections import OrderedDict
 
 from ..card_readers import card_readers
 from ..utilities import convert_field
-from .bdf_h5 import BDFH5
+from ..h5 import BDFH5Writer
 
 
 class BDFReader(object):
@@ -38,14 +35,10 @@ class BDFReader(object):
 
     def read_bdf(self):
 
-        try:
-            self.h5file = tables.open_file(self.h5filename, mode="w", title="%s" % self.h5filename)
-            self.h5file.create_group("/", "Model", "Model Data")
-        except Exception:
-            print "Unable to create h5 file %s!" % self.h5filename
-            return
+        self.h5file = BDFH5Writer(self.h5filename, "/Model")
 
-        self.h5file = BDFH5(self.h5file, "/Model")
+        if self.h5file.file is None:
+            return
 
         try:
             self.bdffile = open(self.bdffilename, "r")
