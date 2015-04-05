@@ -24,6 +24,8 @@ class BDFH5Reader(object):
 
         self._coords = CoordinateSystems()
 
+        self._original_id = 0
+
         self.file = h5file
 
     @property
@@ -173,6 +175,8 @@ class BDFH5Reader(object):
 
     def create_vtk_data(self):
 
+        self._original_id = 0
+
         ugrid = vtk.vtkUnstructuredGrid()
         global_ids = vtk.vtkIntArray()
         global_ids.SetName("global_ids")
@@ -181,6 +185,9 @@ class BDFH5Reader(object):
         card_ids = vtk.vtkIntArray()
         card_ids.SetName("card_ids")
         ugrid.GetCellData().AddArray(card_ids)
+
+        original_ids.SetName("original_ids")
+        ugrid.GetCellData().AddArray(original_ids)
 
         points, nid_map = self._create_vtk_points(ugrid)
 
@@ -199,7 +206,7 @@ class BDFH5Reader(object):
 
         global_ids.Squeeze()
         card_ids.Squeeze()
-        global_ids.Squeeze()
+        original_ids.Squeeze()
 
         return ugrid
 
@@ -224,6 +231,7 @@ class BDFH5Reader(object):
 
         global_ids = ugrid.GetCellData().GetArray("global_ids")
         card_ids = ugrid.GetCellData().GetArray("card_ids")
+        original_ids = ugrid.GetCellData().GetArray("original_ids")
 
         bdf_numbering = bdf_card_numbering["GRID"]
 
@@ -251,6 +259,9 @@ class BDFH5Reader(object):
             ugrid.InsertNextCell(cell_type, ids)
             global_ids.InsertNextValue(_id)
             card_ids.InsertNextValue(bdf_numbering)
+
+            original_ids.InsertNextValue(self._original_id)
+            self._original_id += 1
 
         points.Squeeze()
 
@@ -281,6 +292,7 @@ class BDFH5Reader(object):
 
         global_ids = ugrid.GetCellData().GetArray("global_ids")
         card_ids = ugrid.GetCellData().GetArray("card_ids")
+        original_ids = ugrid.GetCellData().GetArray("original_ids")
 
         bdf_numbering = bdf_card_numbering["CBEAM"]
 
@@ -297,6 +309,9 @@ class BDFH5Reader(object):
             ugrid.InsertNextCell(cell_type, ids)
             global_ids.InsertNextValue(_id)
             card_ids.InsertNextValue(bdf_numbering)
+
+            original_ids.InsertNextValue(self._original_id)
+            self._original_id += 1
 
     def _create_vtk_ctria3(self, ugrid, nid_map, table_name):
 
@@ -325,6 +340,7 @@ class BDFH5Reader(object):
 
         global_ids = ugrid.GetCellData().GetArray("global_ids")
         card_ids = ugrid.GetCellData().GetArray("card_ids")
+        original_ids = ugrid.GetCellData().GetArray("original_ids")
 
         bdf_numbering = bdf_card_numbering["CTRIA3"]
 
@@ -342,6 +358,9 @@ class BDFH5Reader(object):
             ugrid.InsertNextCell(cell_type, ids)
             global_ids.InsertNextValue(_id)
             card_ids.InsertNextValue(bdf_numbering)
+
+            original_ids.InsertNextValue(self._original_id)
+            self._original_id += 1
 
     def _create_vtk_cquad4(self, ugrid, nid_map, table_name):
 
@@ -372,6 +391,7 @@ class BDFH5Reader(object):
 
         global_ids = ugrid.GetCellData().GetArray("global_ids")
         card_ids = ugrid.GetCellData().GetArray("card_ids")
+        original_ids = ugrid.GetCellData().GetArray("original_ids")
 
         bdf_numbering = bdf_card_numbering["CQUAD4"]
 
@@ -390,6 +410,9 @@ class BDFH5Reader(object):
             ugrid.InsertNextCell(cell_type, ids)
             global_ids.InsertNextValue(_id)
             card_ids.InsertNextValue(bdf_numbering)
+
+            original_ids.InsertNextValue(self._original_id)
+            self._original_id += 1
 
 
 if __name__ == '__main__':
