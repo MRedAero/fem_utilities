@@ -189,10 +189,10 @@ class BDFReader(object):
                     # noinspection PyUnboundLocalVariable,PyCallingNonCallable
                     card_reader = card_readers[card](self.h5file)
                     card_reader.read_card(data)
-                except Exception:
+                except Exception, e:
                     # noinspection PyUnboundLocalVariable
                     print 'BDF %s: line %d: field_width = %d\n%s' % (filename, bdf_line+1, field_width, card_line)
-                    raise
+                    raise e
 
                 #goto = 0
 

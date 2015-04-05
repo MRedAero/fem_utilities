@@ -9,4 +9,7 @@ class SingletonDecorator(object):
     def __call__(self, h5file):
         if self.instance is None:
             self.instance = self.klass(h5file)
+        else:
+            self.instance.__init__(h5file)
+
         return self.instance

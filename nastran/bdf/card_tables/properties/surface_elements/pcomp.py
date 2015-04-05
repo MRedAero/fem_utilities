@@ -38,7 +38,7 @@ class PCOMP(object):
 
         self.data_table = self.h5file.create_table(self.data_group, "PCOMP_data", self.DataTable, "PCOMP Data Table")
 
-        self.ply_table = self.h5file.create_table(self.data_group, "PCOMP_Plies", self.DataTable, "PCOMP Ply Data Table")
+        self.ply_table = self.h5file.create_table(self.data_group, "PCOMP_Plies", self.PlyTable, "PCOMP Ply Data Table")
 
         self.data_row = self.data_table.row
         self.ply_row = self.ply_table.row
