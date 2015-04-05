@@ -186,6 +186,7 @@ class BDFH5Reader(object):
         card_ids.SetName("card_ids")
         ugrid.GetCellData().AddArray(card_ids)
 
+        original_ids = vtk.vtkIntArray()
         original_ids.SetName("original_ids")
         ugrid.GetCellData().AddArray(original_ids)
 
