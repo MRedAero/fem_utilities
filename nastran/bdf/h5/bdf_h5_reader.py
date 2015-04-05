@@ -234,12 +234,11 @@ class BDFH5Reader(object):
         for i in xrange(len(table_data)):
             data = table_data[i]
 
-            if data[1] >= 0:
-                coord_id = str(data[1])
+            if data[1] > 0:
+                coord_id = data[1]
+                xyz = coords[coord_id].to_global([data[5], data[6], data[7]])
             else:
-                coord_id = "0"
-
-            xyz = coords[coord_id].to_global([data[5], data[6], data[7]])
+                xyz = [data[5], data[6], data[7]]
 
             _id = data[2]
 
@@ -338,7 +337,7 @@ class BDFH5Reader(object):
             ids = cell.GetPointIds()
             ids.SetId(0, nid_map[data[g1]])
             ids.SetId(1, nid_map[data[g2]])
-            ids.SetId(1, nid_map[data[g3]])
+            ids.SetId(2, nid_map[data[g3]])
 
             ugrid.InsertNextCell(cell_type, ids)
             global_ids.InsertNextValue(_id)
@@ -385,8 +384,8 @@ class BDFH5Reader(object):
             ids = cell.GetPointIds()
             ids.SetId(0, nid_map[data[g1]])
             ids.SetId(1, nid_map[data[g2]])
-            ids.SetId(1, nid_map[data[g3]])
-            ids.SetId(1, nid_map[data[g4]])
+            ids.SetId(2, nid_map[data[g3]])
+            ids.SetId(3, nid_map[data[g4]])
 
             ugrid.InsertNextCell(cell_type, ids)
             global_ids.InsertNextValue(_id)
