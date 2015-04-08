@@ -139,13 +139,16 @@ class BDFReader(object):
                 except Exception:
                     cont = ''
 
-                j = i + 1
+                j = i
 
                 while True:
 
-                    line = remove_comments(lines[j])
+                    try:
+                        line = remove_comments(lines[j+1])
+                    except IndexError:
+                        break
 
-                    if line[0:8].strip() == cont:
+                    if line[0:8].strip().replace(r'*', '') == cont:
                         card_line += '%-64s' % line[8:72]
                         try:
                             j = iterator.next()
