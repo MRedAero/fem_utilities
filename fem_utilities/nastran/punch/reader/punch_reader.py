@@ -86,7 +86,8 @@ class PunchReader(object):
     def read_pch(self):
 
         try:
-            self.h5file = tables.open_file(self.h5filename, mode="w", title="%s" % self.h5filename)
+            filters = tables.Filters(complib='zlib', complevel=5)
+            self.h5file = tables.open_file(self.h5filename, mode="w", title="%s" % self.h5filename, filters=filters)
         except Exception:
             print "Unable to create h5 file %s!" % self.h5filename
             return

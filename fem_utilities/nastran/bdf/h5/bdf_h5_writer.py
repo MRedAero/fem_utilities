@@ -35,7 +35,8 @@ class BDFH5Writer(object):
     def file(self, value):
         if isinstance(value, str):
             try:
-                self._file = tables.open_file(value, mode="w", title="%s" % value)
+                filters = tables.Filters(complib='zlib', complevel=5)
+                self._file = tables.open_file(value, mode="w", title="%s" % value, filters=filters)
                 self._file.create_group("/", self._prefix, "%s Data" % self._prefix)
             except Exception:
                 print "Unable to create h5 file %s!" % value
